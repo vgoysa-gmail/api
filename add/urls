@@ -1,0 +1,12 @@
+#!/bin/bash
+cat <<HEAD
+Content-type: text/plain
+Access-Control-Allow-Origin: $HTTP_ORIGIN
+Access-Control-Allow-Credentials: true
+
+HEAD
+sed -e '1 s/^/#/' -e '$ a\
+' | tee -a /home/vgoissa/gam/added.txt | tee -a "/tmp/$(basename $0) $(date).txt"
+
+echo Processed on `date` 
+echo By $0.

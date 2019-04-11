@@ -1,0 +1,10 @@
+#!/bin/bash
+cat <<HEAD
+Content-type: application/json
+Access-Control-Allow-Origin: $HTTP_ORIGIN
+Access-Control-Allow-Credentials: true
+
+HEAD
+if [ "$REQUEST_METHOD" == "GET" ]; then
+  cat $0.json
+fi

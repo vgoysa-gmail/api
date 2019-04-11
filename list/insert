@@ -1,0 +1,59 @@
+#!/usr/bin/python3
+#/usr/bin/env python3
+import os
+import sys
+import json
+
+head1="""Access-Control-Allow-Origin: {HTTP_ORIGIN}
+Access-Control-Allow-Credentials: true
+Vary: Origin, Access-Control-Request-Headers
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+access-control-allow-headers: content-type
+"""
+head2="""Content-type: application/json
+"""
+errmsg="""Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+Vary: Origin, Access-Control-Request-Headers
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+access-control-allow-headers: content-type
+Status: 500 %s
+
+"""
+
+if "HTTP_ORIGIN" in os.environ:
+  head = head1
+else:
+  head = head2
+if os.environ["REQUEST_METHOD"]=="POST":
+  head=head2+head1
+  data = json.load(sys.stdin)
+src={"+":"good.json","-":"black.json","?":"trial.json"}
+lists={}
+for (k,v) in src.items():
+  with open(v,"r") as json_file:
+    lists[k]=json.load(json_file)
+modified={}
+print (head.format(**os.environ))
+if os.environ["REQUEST_METHOD"]=="POST":
+    #+data["shows"]
+    for s in data["shows"]:
+        for (k,v) in lists.items():
+            if s in v:
+                modified[k]=True
+                v.remove(s)
+                print("removed", k, s)
+        print("adding", s)
+        lists[data["action"]].append(s)
+        modified[data["action"]]=True
+    #print()
+    print(json.dumps(lists[data["action"]]))
+    for (k,v) in modified.items():
+        print("modifying", k)
+        if v:
+            with open(src[k],"w") as json_file:
+                print("writing", k)
+                json.dump(lists[k],json_file)
+# try:
+# except Exception as e:
+#     print(errmsg%str(e))
